@@ -12,9 +12,9 @@ public class GameState {
     private Player winner;
 
 
-    public GameState(Player[] players, UUID gameID) {
+    public GameState(Player[] players) {
         initializeBoard();
-        this.gameID = gameID;
+        this.gameID = UUID.randomUUID();
         this.players = players;
         this.isFinished = false;
         this.winner = null;
@@ -28,7 +28,7 @@ public class GameState {
         }
     }
 
-    public void finishGame (){
+    public void finishGame() {
         this.isFinished = true;
     }
 

@@ -6,7 +6,8 @@ project/
 │   ├── models/
 │   │   ├── GameState.java                    // Shared game state model
 │   │   ├── Move.java                         // Move model
-│   │   └── Player.java                       // Player model (including IP for chat)
+│   │   ├── Player.java                       // Player model (including IP for chat)
+│   │   └── GameRoom.java                     // Game room model
 │   └── utils/
 │       ├── Constants.java                    // Constants used across modules
 │       └── Statistics.java                   // Shared statistics model

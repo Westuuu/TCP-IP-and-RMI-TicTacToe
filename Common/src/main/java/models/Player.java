@@ -7,12 +7,14 @@ import java.util.UUID;
 
 public class Player {
     private final UUID playerID;
+    private final String name;
     private InetSocketAddress socketAddress; // for tcp/ip
     private Map<String, Integer> playerStats = new HashMap<>(); // win-loss-draw
 
-    public Player() {
+    public Player(String name) {
         this.playerID = UUID.randomUUID();
         initializePlayerStats();
+        this.name = name;
     }
 
     private void initializePlayerStats() {
@@ -45,5 +47,9 @@ public class Player {
 
     public Map<String, Integer> getPlayerStats() {
         return playerStats;
+    }
+
+    public String getName() {
+        return name;
     }
 }
