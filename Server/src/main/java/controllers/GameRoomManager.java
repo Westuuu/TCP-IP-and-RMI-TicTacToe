@@ -4,27 +4,47 @@ import models.GameRoom;
 import models.GameState;
 import models.Player;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 public class GameRoomManager {
     private static final Logger LOGGER = Logger.getLogger(GameRoomManager.class.getName());
 
+    private Map<UUID, GameRoom> activeGameRooms;
+    private Map<GameRoom, ArrayList<Player>> playerGameRooms;
 
-    public boolean joinRoom(GameRoom gameRoom, Player player) {
+    public GameRoomManager() {
+        this.activeGameRooms = new HashMap<>();
+        this.playerGameRooms = new HashMap<>();
+    }
+
+    public void createGameRoom(String roomName, Player ownerPlayer) {
+        GameRoom gameRoom = new GameRoom(roomName, ownerPlayer);
+        activeGameRooms.put(gameRoom.getGameRoomID(), gameRoom);
+    }
+
+    public boolean deleteGameRoom(UUID gameRoomID) {
+        return activeGameRooms.remove(gameRoomID) != null;
+    }
+
+    public boolean joinRoom(UUID gameRoomID, Player player) {
         if (player == null) {
             LOGGER.warning("Player is null!");
             return false;
         }
 
-        if (player.equals(gameRoom.getPlayers()[0]) || player.equals(gameRoom.getPlayers()[1])) {
+        if (player.equals(activeGameRooms.get(gameRoomID).getPlayers()[0]) || player.equals(activeGameRooms.get(gameRoomID).getPlayers()[1])) {
             LOGGER.warning("Player " + player.getName() + " is already in the room!");
             return false;
         }
 
-        if (gameRoom.getPlayers()[0] == null) {
-            gameRoom.getPlayers()[0] = player;
-        } else if (gameRoom.getPlayers()[1] == null) {
-            gameRoom.getPlayers()[1] = player;
+        if (activeGameRooms.get(gameRoomID).getPlayers()[0] == null) {
+            activeGameRooms.get(gameRoomID).getPlayers()[0] = player;
+        } else if (activeGameRooms.get(gameRoomID).getPlayers()[1] == null) {
+            activeGameRooms.get(gameRoomID).getPlayers()[1] = player;
         } else {
             LOGGER.warning("Room is already full!");
             return false;
@@ -34,16 +54,16 @@ public class GameRoomManager {
         return true;
     }
 
-    public boolean leaveRoom(GameRoom gameRoom, Player player) {
+    public boolean leaveRoom(UUID gameRoomID, Player player) {
         if (player == null) {
             LOGGER.warning("Player is null!");
             return false;
         }
 
-        if (gameRoom.getPlayers()[0] == player) {
-            gameRoom.getPlayers()[0] = null;
-        } else if (gameRoom.getPlayers()[1] == player) {
-            gameRoom.getPlayers()[1] = null;
+        if (activeGameRooms.get(gameRoomID).getPlayers()[0] == player) {
+            activeGameRooms.get(gameRoomID).getPlayers()[0] = null;
+        } else if (activeGameRooms.get(gameRoomID).getPlayers()[1] == player) {
+            activeGameRooms.get(gameRoomID).getPlayers()[1] = null;
         } else {
             LOGGER.warning("Player " + player.getName() + " is not in the room!");
             return false;
@@ -53,8 +73,8 @@ public class GameRoomManager {
         return true;
     }
 
-    public boolean startGame(GameRoom gameRoom) {
-        Player[] players = gameRoom.getPlayers();
+    public boolean startGame(UUID gameRoomID) {
+        Player[] players = activeGameRooms.get(gameRoomID).getPlayers();
 
         if (players[0] == null || players[1] == null) {
             LOGGER.warning("Room is not full!");
@@ -62,7 +82,25 @@ public class GameRoomManager {
         }
 
         GameState newGameState = new GameState(players);
-        gameRoom.setGameState(newGameState);
+        activeGameRooms.get(gameRoomID).setGameState(newGameState);
         return true;
+    }
+
+    public Map<UUID, GameRoom> getActiveGameRooms() {
+        return activeGameRooms;
+    }
+
+    public void removeGameRoom(UUID gameRoomID) {
+        activeGameRooms.remove(gameRoomID);
+    }
+
+    public Map<GameRoom, ArrayList<Player>> getPlayerGameRooms() {
+        return playerGameRooms;
+    }
+
+    public void removePlayerFromGameRoom(UUID gameRoomID, Player player) {
+        ArrayList<Player> playersInRoom = playerGameRooms.get(activeGameRooms.get(gameRoomID));
+        playersInRoom.remove(player);
+        playerGameRooms.put(activeGameRooms.get(gameRoomID), playersInRoom);
     }
 }

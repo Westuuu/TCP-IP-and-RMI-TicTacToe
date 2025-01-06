@@ -1,10 +1,11 @@
 package models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-public class GameRoom {
+public class GameRoom implements Serializable {
     private final static Logger LOGGER = Logger.getLogger(GameRoom.class.getName());
 
     private final UUID gameRoomID;
@@ -12,6 +13,7 @@ public class GameRoom {
     private GameState gameState;
     private Player[] players;
     private RoomStatus roomStatus;
+    private Player ownerPlayer;
     private ArrayList<GameState> gamesPlayed = new ArrayList<>();
 
     public enum RoomStatus {
@@ -19,11 +21,11 @@ public class GameRoom {
         CLOSED
     }
 
-    public GameRoom(String gameRoomName, Player player) {
+    public GameRoom(String gameRoomName, Player ownerPlayer) {
         this.gameRoomID = UUID.randomUUID();
         this.gameRoomName = gameRoomName;
         this.players = new Player[2];
-        this.players[0] = player;
+        this.ownerPlayer = ownerPlayer;
     }
 
     public UUID getGameRoomID() {
@@ -66,4 +68,7 @@ public class GameRoom {
         this.gameRoomName = gameRoomName;
     }
 
+    public Player getOwnerPlayer() {
+        return ownerPlayer;
+    }
 }

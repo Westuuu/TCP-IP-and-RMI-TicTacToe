@@ -1,9 +1,10 @@
 package models;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.UUID;
 
-public class GameState {
+public class GameState implements Serializable {
     private char[][] board;
     private final UUID gameID;
     private Player[] players;

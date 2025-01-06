@@ -1,8 +1,9 @@
 package models;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class Move {
+public class Move implements Serializable {
     private final int row;
     private final int column;
     private final int moveID;

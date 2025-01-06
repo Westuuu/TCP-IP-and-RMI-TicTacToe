@@ -1,15 +1,17 @@
 package models;
 
+import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class Player {
+public class Player implements Serializable {
     private final UUID playerID;
     private final String name;
     private InetSocketAddress socketAddress; // for tcp/ip
     private Map<String, Integer> playerStats = new HashMap<>(); // win-loss-draw
+    private UUID ownedGameRoom;
 
     public Player(String name) {
         this.playerID = UUID.randomUUID();
@@ -52,4 +54,26 @@ public class Player {
     public String getName() {
         return name;
     }
+
+    public void setOwnedGameRoom(UUID ownedGameRoom) {
+        this.ownedGameRoom = ownedGameRoom;
+    }
+
+    public UUID getOwnedGameRoom() {
+        return ownedGameRoom;
+    }
+
+    public void deleteOwnedGameRoom() {
+        this.ownedGameRoom = null;
+    }
+
+    public InetSocketAddress getSocketAddress() {
+        return socketAddress;
+    }
+
+    public void setSocketAddress(InetSocketAddress socketAddress) {
+        this.socketAddress = socketAddress;
+    }
+
+
 }
