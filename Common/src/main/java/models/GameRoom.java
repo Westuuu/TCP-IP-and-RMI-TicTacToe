@@ -71,4 +71,8 @@ public class GameRoom implements Serializable {
     public Player getOwnerPlayer() {
         return ownerPlayer;
     }
+
+    public boolean isRoomFull(){
+        return players[0] != null && players[1] != null;
+    }
 }

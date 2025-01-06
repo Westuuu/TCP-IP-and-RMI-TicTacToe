@@ -50,6 +50,7 @@ public class GameRoomManager {
             return false;
         }
 
+        addPlayerToGameRoom(gameRoomID, player);
         LOGGER.info("Player " + player.getName() + " joined the room!");
         return true;
     }
@@ -69,6 +70,7 @@ public class GameRoomManager {
             return false;
         }
 
+        removePlayerFromGameRoom(gameRoomID, player);
         LOGGER.info("Player " + player.getName() + " left the room!");
         return true;
     }
@@ -83,6 +85,7 @@ public class GameRoomManager {
 
         GameState newGameState = new GameState(players);
         activeGameRooms.get(gameRoomID).setGameState(newGameState);
+        activeGameRooms.get(gameRoomID).setRoomStatus(GameRoom.RoomStatus.CLOSED);
         return true;
     }
 
@@ -98,9 +101,15 @@ public class GameRoomManager {
         return playerGameRooms;
     }
 
-    public void removePlayerFromGameRoom(UUID gameRoomID, Player player) {
+    private void removePlayerFromGameRoom(UUID gameRoomID, Player player) {
         ArrayList<Player> playersInRoom = playerGameRooms.get(activeGameRooms.get(gameRoomID));
         playersInRoom.remove(player);
+        playerGameRooms.put(activeGameRooms.get(gameRoomID), playersInRoom);
+    }
+
+    private void addPlayerToGameRoom(UUID gameRoomID, Player player) {
+        ArrayList<Player> playersInRoom = playerGameRooms.get(activeGameRooms.get(gameRoomID));
+        playersInRoom.add(player);
         playerGameRooms.put(activeGameRooms.get(gameRoomID), playersInRoom);
     }
 }

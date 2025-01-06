@@ -18,7 +18,7 @@ public interface GameServerInterface extends Remote {
 
     void createRoom(String roomName, Player ownerPlayer) throws RemoteException;
 
-    void removeRoom(UUID gameRoomID) throws RemoteException;
+    void removeRoom(UUID gameRoomID, Player player) throws RemoteException;
 
     void joinRoom(UUID gameRoomID, Player player) throws RemoteException;
 
@@ -26,9 +26,9 @@ public interface GameServerInterface extends Remote {
 
     void startGame(UUID gameRoomID) throws RemoteException;
 
-    void makeMove(Move move) throws RemoteException;
+    void makeMove(UUID gameRoomID, Move move) throws RemoteException;
 
-    GameState getGameState() throws RemoteException;
+    GameState getGameState(UUID gameID) throws RemoteException;
 
     ArrayList<GameRoom> getActiveRooms() throws RemoteException;
 
