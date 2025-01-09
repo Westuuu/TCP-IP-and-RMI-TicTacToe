@@ -1,9 +1,6 @@
 package interfaces;
 
-import models.GameRoom;
-import models.GameState;
-import models.Move;
-import models.Player;
+import models.*;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -16,13 +13,9 @@ public interface GameServerInterface extends Remote {
 
     void unregisterPlayer(Player player) throws RemoteException;
 
-    void createRoom(String roomName, Player ownerPlayer) throws RemoteException;
-
-    void removeRoom(UUID gameRoomID, Player player) throws RemoteException;
+    UUID createRoom(String roomName, Player ownerPlayer) throws RemoteException;
 
     void joinRoom(UUID gameRoomID, Player player) throws RemoteException;
-
-    void leaveRoom(UUID gameRoomID, Player player) throws RemoteException;
 
     void startGame(UUID gameRoomID) throws RemoteException;
 
@@ -34,4 +27,11 @@ public interface GameServerInterface extends Remote {
 
     GameRoom getRoomInfo(UUID roomID) throws RemoteException;
 
+    String getOpponentIP(UUID roomId, Player player) throws RemoteException;
+
+    int getPort(UUID gameRoomID, Player player) throws RemoteException;
+
+    void setOwnerPort(UUID gameRoomID, Player player, int port) throws RemoteException;
+
+    Player getUpdatedPlayer(UUID playerId) throws RemoteException;
 }

@@ -1,31 +1,33 @@
 package models;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 public class GameRoom implements Serializable {
-    private final static Logger LOGGER = Logger.getLogger(GameRoom.class.getName());
-
-    private final UUID gameRoomID;
-    private String gameRoomName;
-    private GameState gameState;
-    private Player[] players;
-    private RoomStatus roomStatus;
-    private Player ownerPlayer;
-    private ArrayList<GameState> gamesPlayed = new ArrayList<>();
-
+    private static final long serialVersionUID = 1L;
+    
     public enum RoomStatus {
-        OPEN,
-        CLOSED
+        WAITING,
+        PLAYING,
+        FINISHED
     }
 
-    public GameRoom(String gameRoomName, Player ownerPlayer) {
+    private final UUID gameRoomID;
+    private final String gameRoomName;
+    private final Player owner;
+    private Player playerX;
+    private Player playerO;
+    private RoomStatus roomStatus;
+    private GameState gameState;
+
+    public GameRoom(String gameRoomName, Player owner) {
         this.gameRoomID = UUID.randomUUID();
         this.gameRoomName = gameRoomName;
-        this.players = new Player[2];
-        this.ownerPlayer = ownerPlayer;
+        this.owner = owner;
+        this.playerX = owner;
+        this.roomStatus = RoomStatus.WAITING;
+        this.gameState = new GameState(this.gameRoomID);
+        this.gameState.setPlayerX(owner);
     }
 
     public UUID getGameRoomID() {
@@ -36,43 +38,48 @@ public class GameRoom implements Serializable {
         return gameRoomName;
     }
 
-    public GameState getGameState() {
-        return gameState;
-    }
-
-    public Player[] getPlayers() {
-        return players;
-    }
-
-    public ArrayList<GameState> getGamesPlayed() {
-        return gamesPlayed;
+    public Player getOwner() {
+        return owner;
     }
 
     public RoomStatus getRoomStatus() {
         return roomStatus;
     }
 
-    public void setRoomStatus(RoomStatus roomStatus) {
-        this.roomStatus = roomStatus;
+    public void setRoomStatus(RoomStatus status) {
+        this.roomStatus = status;
     }
 
-    public void setGameState(GameState gameState) {
-        this.gameState = gameState;
+    public GameState getGameState() {
+        return gameState;
     }
 
-    public void setPlayers(Player[] players) {
-        this.players = players;
+    public boolean isRoomFull() {
+        return playerX != null && playerO != null;
     }
 
-    public void setGameRoomName(String gameRoomName) {
-        this.gameRoomName = gameRoomName;
+    public void addPlayer(Player player) {
+        if (playerO == null && !player.equals(playerX)) {
+            playerO = player;
+            gameState.setPlayerO(player);
+        }
     }
 
-    public Player getOwnerPlayer() {
-        return ownerPlayer;
+    public void removePlayer(Player player) {
+        if (player.equals(playerX)) {
+            playerX = null;
+            gameState.setPlayerX(null);
+        } else if (player.equals(playerO)) {
+            playerO = null;
+            gameState.setPlayerO(null);
+        }
     }
 
-    public boolean isRoomFull(){
-        return players[0] != null && players[1] != null;
+    public void startGame() {
+        if (isRoomFull()) {
+            roomStatus = RoomStatus.PLAYING;
+            gameState.startGame();
+            gameState.setCurrentPlayerTurn(playerX);
+        }
     }
 }

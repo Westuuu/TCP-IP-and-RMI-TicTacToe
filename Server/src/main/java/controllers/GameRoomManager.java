@@ -2,114 +2,99 @@ package controllers;
 
 import models.GameRoom;
 import models.GameState;
+import models.Move;
 import models.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.rmi.RemoteException;
 import java.util.logging.Logger;
 
 public class GameRoomManager {
     private static final Logger LOGGER = Logger.getLogger(GameRoomManager.class.getName());
 
-    private Map<UUID, GameRoom> activeGameRooms;
-    private Map<GameRoom, ArrayList<Player>> playerGameRooms;
-
-    public GameRoomManager() {
-        this.activeGameRooms = new HashMap<>();
-        this.playerGameRooms = new HashMap<>();
+    public GameRoom createRoom(String roomName, Player owner) throws RemoteException {
+        GameRoom room = new GameRoom(roomName, owner);
+        LOGGER.info("Created room: " + roomName + " with owner: " + owner.getName());
+        return room;
     }
 
-    public void createGameRoom(String roomName, Player ownerPlayer) {
-        GameRoom gameRoom = new GameRoom(roomName, ownerPlayer);
-        activeGameRooms.put(gameRoom.getGameRoomID(), gameRoom);
+    public void removeRoom(GameRoom room, Player player) throws RemoteException {
+        if (!room.getOwner().equals(player)) {
+            throw new RemoteException("Only room owner can remove the room");
+        }
+        LOGGER.info("Removed room: " + room.getGameRoomName());
     }
 
-    public boolean deleteGameRoom(UUID gameRoomID) {
-        return activeGameRooms.remove(gameRoomID) != null;
+    public void joinRoom(GameRoom room, Player player) throws RemoteException {
+        if (room.isRoomFull()) {
+            throw new RemoteException("Room is full");
+        }
+        if (room.getRoomStatus() != GameRoom.RoomStatus.WAITING) {
+            throw new RemoteException("Game already in progress");
+        }
+        room.addPlayer(player);
+        LOGGER.info("Player " + player.getName() + " joined room: " + room.getGameRoomName());
     }
 
-    public boolean joinRoom(UUID gameRoomID, Player player) {
-        if (player == null) {
-            LOGGER.warning("Player is null!");
-            return false;
+    public void leaveRoom(GameRoom room, Player player) throws RemoteException {
+        room.removePlayer(player);
+        LOGGER.info("Player " + player.getName() + " left room: " + room.getGameRoomName());
+    }
+
+    public void startGame(GameRoom room) throws RemoteException {
+        if (!room.isRoomFull()) {
+            throw new RemoteException("Need exactly 2 players to start the game");
+        }
+        room.startGame();
+        LOGGER.info("Started game in room: " + room.getGameRoomName());
+    }
+
+    public void makeMove(GameRoom room, Move move) throws RemoteException {
+        GameState state = room.getGameState();
+        if (!state.isGameStarted()) {
+            throw new RemoteException("Game has not started yet");
+        }
+        if (!TicTacToeRules.isValidMove(state, move)) {
+            throw new RemoteException("Invalid move");
         }
 
-        if (player.equals(activeGameRooms.get(gameRoomID).getPlayers()[0]) || player.equals(activeGameRooms.get(gameRoomID).getPlayers()[1])) {
-            LOGGER.warning("Player " + player.getName() + " is already in the room!");
-            return false;
+        state.addMove(move);
+        LOGGER.info("Move made in room " + room.getGameRoomName() + ": " + move);
+
+        Player nextPlayer = move.getPlayer().equals(state.getPlayerX()) ?
+            state.getPlayerO() : state.getPlayerX();
+        state.setCurrentPlayerTurn(nextPlayer);
+
+        Player winner = TicTacToeRules.checkWinner(state);
+        if (winner != null) {
+            handleGameEnd(room, winner);
+        } else if (TicTacToeRules.isDraw(state)) {
+            handleGameDraw(room);
         }
-
-        if (activeGameRooms.get(gameRoomID).getPlayers()[0] == null) {
-            activeGameRooms.get(gameRoomID).getPlayers()[0] = player;
-        } else if (activeGameRooms.get(gameRoomID).getPlayers()[1] == null) {
-            activeGameRooms.get(gameRoomID).getPlayers()[1] = player;
-        } else {
-            LOGGER.warning("Room is already full!");
-            return false;
-        }
-
-        addPlayerToGameRoom(gameRoomID, player);
-        LOGGER.info("Player " + player.getName() + " joined the room!");
-        return true;
     }
 
-    public boolean leaveRoom(UUID gameRoomID, Player player) {
-        if (player == null) {
-            LOGGER.warning("Player is null!");
-            return false;
-        }
-
-        if (activeGameRooms.get(gameRoomID).getPlayers()[0] == player) {
-            activeGameRooms.get(gameRoomID).getPlayers()[0] = null;
-        } else if (activeGameRooms.get(gameRoomID).getPlayers()[1] == player) {
-            activeGameRooms.get(gameRoomID).getPlayers()[1] = null;
-        } else {
-            LOGGER.warning("Player " + player.getName() + " is not in the room!");
-            return false;
-        }
-
-        removePlayerFromGameRoom(gameRoomID, player);
-        LOGGER.info("Player " + player.getName() + " left the room!");
-        return true;
+    private void handleGameEnd(GameRoom room, Player winner) {
+        GameState state = room.getGameState();
+        Player loser = winner.equals(state.getPlayerX()) ? state.getPlayerO() : state.getPlayerX();
+        
+        winner.getPlayerStats().incrementWins();
+        loser.getPlayerStats().incrementLosses();
+        
+        state.setWinner(winner);
+        state.finishGame();
+        room.setRoomStatus(GameRoom.RoomStatus.FINISHED);
+        
+        LOGGER.info(String.format("Game ended in room %s. Winner: %s, Loser: %s", 
+            room.getGameRoomName(), winner.getName(), loser.getName()));
     }
 
-    public boolean startGame(UUID gameRoomID) {
-        Player[] players = activeGameRooms.get(gameRoomID).getPlayers();
-
-        if (players[0] == null || players[1] == null) {
-            LOGGER.warning("Room is not full!");
-            return false;
-        }
-
-        GameState newGameState = new GameState(players);
-        activeGameRooms.get(gameRoomID).setGameState(newGameState);
-        activeGameRooms.get(gameRoomID).setRoomStatus(GameRoom.RoomStatus.CLOSED);
-        return true;
-    }
-
-    public Map<UUID, GameRoom> getActiveGameRooms() {
-        return activeGameRooms;
-    }
-
-    public void removeGameRoom(UUID gameRoomID) {
-        activeGameRooms.remove(gameRoomID);
-    }
-
-    public Map<GameRoom, ArrayList<Player>> getPlayerGameRooms() {
-        return playerGameRooms;
-    }
-
-    private void removePlayerFromGameRoom(UUID gameRoomID, Player player) {
-        ArrayList<Player> playersInRoom = playerGameRooms.get(activeGameRooms.get(gameRoomID));
-        playersInRoom.remove(player);
-        playerGameRooms.put(activeGameRooms.get(gameRoomID), playersInRoom);
-    }
-
-    private void addPlayerToGameRoom(UUID gameRoomID, Player player) {
-        ArrayList<Player> playersInRoom = playerGameRooms.get(activeGameRooms.get(gameRoomID));
-        playersInRoom.add(player);
-        playerGameRooms.put(activeGameRooms.get(gameRoomID), playersInRoom);
+    private void handleGameDraw(GameRoom room) {
+        GameState state = room.getGameState();
+        state.getPlayerX().getPlayerStats().incrementDraws();
+        state.getPlayerO().getPlayerStats().incrementDraws();
+        
+        state.finishGame();
+        room.setRoomStatus(GameRoom.RoomStatus.FINISHED);
+        
+        LOGGER.info(String.format("Game ended in draw in room %s", room.getGameRoomName()));
     }
 }

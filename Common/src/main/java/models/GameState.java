@@ -2,94 +2,103 @@ package models;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 public class GameState implements Serializable {
-    private char[][] board;
+    private static final long serialVersionUID = 1L;
+    
     private final UUID gameID;
-    private Player[] players;
+    private final List<Move> moves;
+    private final char[][] board;
+    private Player playerX;
+    private Player playerO;
     private Player currentPlayerTurn;
-    private boolean isFinished;
     private Player winner;
-    private ArrayList<Move> moves;
-    private boolean isGameStarted;
+    private boolean gameStarted;
+    private boolean finished;
 
-    private static ArrayList<UUID> allGameIDs = new ArrayList<>();
-
-
-    public GameState(Player[] players) {
+    public GameState(UUID gameID) {
+        this.gameID = gameID;
+        this.moves = new ArrayList<>();
+        this.board = new char[3][3];
+        this.gameStarted = false;
+        this.finished = false;
         initializeBoard();
-        this.gameID = UUID.randomUUID();
-        allGameIDs.add(gameID);
-        this.players = players;
-        this.isFinished = false;
-        this.winner = null;
-        this.currentPlayerTurn = null;
-        this.isGameStarted = false;
     }
 
     private void initializeBoard() {
-        this.board = new char[3][3];
-        for (char[] chars : this.board) {
-            Arrays.fill(chars, ' ');
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                board[i][j] = ' ';
+            }
         }
+    }
+
+    public UUID getGameID() {
+        return gameID;
+    }
+
+    public List<Move> getMoves() {
+        return moves;
+    }
+
+    public char[][] getBoard() {
+        return board;
+    }
+
+    public Player getPlayerX() {
+        return playerX;
+    }
+
+    public void setPlayerX(Player player) {
+        this.playerX = player;
+    }
+
+    public Player getPlayerO() {
+        return playerO;
+    }
+
+    public void setPlayerO(Player player) {
+        this.playerO = player;
+    }
+
+    public Player getCurrentPlayerTurn() {
+        return currentPlayerTurn;
+    }
+
+    public void setCurrentPlayerTurn(Player player) {
+        this.currentPlayerTurn = player;
+    }
+
+    public Player getWinner() {
+        return winner;
+    }
+
+    public void setWinner(Player player) {
+        this.winner = player;
+    }
+
+    public boolean isGameStarted() {
+        return gameStarted;
+    }
+
+    public void startGame() {
+        this.gameStarted = true;
+    }
+
+    public boolean isFinished() {
+        return finished;
+    }
+
+    public void finishGame() {
+        this.finished = true;
     }
 
     public void addMove(Move move) {
         moves.add(move);
+        int row = move.getRow();
+        int col = move.getColumn();
+        board[row][col] = move.getPlayer().equals(playerX) ? 'X' : 'O';
     }
-
-    public ArrayList<Move> getMoves() {
-        return moves;
-    }
-
-    public void finishGame() {
-        this.isFinished = true;
-    }
-
-    public void setWinner(Player winner) {
-        this.winner = winner;
-    }
-
-    public void setCurrentPlayerTurn(Player currentPlayerTurn) {
-        this.currentPlayerTurn = currentPlayerTurn;
-    }
-
-    public Player getPlayerTurn() {
-        return this.currentPlayerTurn;
-    }
-
-    public char[][] getBoard() {
-        return this.board;
-    }
-
-    public UUID getGameID() {
-        return this.gameID;
-    }
-
-    public Player getWinner() {
-        return this.winner;
-    }
-
-    public Player getCurrentPlayerTurn() {
-        return this.currentPlayerTurn;
-    }
-
-    public boolean isFinished() {
-        return this.isFinished;
-    }
-
-    public boolean isGameStarted(){
-        return isGameStarted;
-    }
-
-    public Player getPlayerX(){
-        return players[0];
-    }
-
-    public Player getPlayerY(){
-        return players[1];
-    }
-
 }

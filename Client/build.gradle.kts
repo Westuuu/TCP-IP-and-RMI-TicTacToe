@@ -18,3 +18,11 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+project(":Client") {
+    tasks.jar {
+        manifest {
+            attributes["Main-Class"] = "client.TicTacToeClient"
+        }
+    }
+}
