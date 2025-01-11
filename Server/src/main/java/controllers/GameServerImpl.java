@@ -32,8 +32,7 @@ public class GameServerImpl extends UnicastRemoteObject implements GameServerInt
             String clientIP = RemoteServer.getClientHost();
             LOGGER.info("Raw client IP from RMI: " + clientIP);
             
-            // For localhost testing, normalize the IP
-            if (clientIP.startsWith("127.") || clientIP.equals("0:0:0:0:0:0:0:1") || 
+            if (clientIP.startsWith("127.") || clientIP.equals("0:0:0:0:0:0:0:1") ||
                 clientIP.equals("localhost") || clientIP.equals("::1")) {
                 clientIP = "localhost";
                 LOGGER.info("Normalized localhost IP to: " + clientIP);
@@ -43,7 +42,6 @@ public class GameServerImpl extends UnicastRemoteObject implements GameServerInt
             activePlayers.put(player.getPlayerId(), player);
             LOGGER.info("Player registered: " + player.getName() + " from IP: " + clientIP);
         } catch (ServerNotActiveException e) {
-            // If we can't get the client host, default to localhost for testing
             LOGGER.warning("Could not get client IP, defaulting to localhost: " + e.getMessage());
             player.setIpAddress("localhost");
             activePlayers.put(player.getPlayerId(), player);
@@ -58,7 +56,6 @@ public class GameServerImpl extends UnicastRemoteObject implements GameServerInt
 
     @Override
     public UUID createRoom(String roomName, Player ownerPlayer) throws RemoteException {
-        // Get the stored player instance from activePlayers
         Player storedPlayer = activePlayers.get(ownerPlayer.getPlayerId());
         if (storedPlayer == null) {
             throw new RemoteException("Player not registered");

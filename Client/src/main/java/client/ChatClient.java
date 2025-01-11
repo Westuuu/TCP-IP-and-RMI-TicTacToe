@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class ChatClient implements AutoCloseable {
     private static final Logger LOGGER = Logger.getLogger(ChatClient.class.getName());
     private static final int BUFFER_SIZE = 1024;
-    private static final int CONNECTION_TIMEOUT = 5000; // milliseconds
+    private static final int CONNECTION_TIMEOUT = 5000;
 
     private SocketChannel channel;
     private final AtomicBoolean isRunning;
@@ -65,7 +65,7 @@ public class ChatClient implements AutoCloseable {
                 Thread.sleep(100);
             }
 
-            LOGGER.info("Connected to chat server at " + host + ":" + port);
+//            LOGGER.info("Connected to chat server at " + host + ":" + port);
         } catch (IOException | InterruptedException e) {
             LOGGER.severe("Failed to connect to server: " + e.getMessage());
             disconnect();
@@ -110,7 +110,7 @@ public class ChatClient implements AutoCloseable {
         try {
             if (channel.finishConnect()) {
                 isConnected.set(true);
-                LOGGER.info("Connection established");
+//                LOGGER.info("Connection established");
             }
         } catch (IOException e) {
             key.cancel();
@@ -199,7 +199,7 @@ public class ChatClient implements AutoCloseable {
             if (selectorThread != null) {
                 selectorThread.interrupt();
             }
-            LOGGER.info("Disconnected from chat server");
+//            LOGGER.info("Disconnected from chat server");
         } catch (IOException e) {
             LOGGER.severe("Error closing chat connections: " + e.getMessage());
         }

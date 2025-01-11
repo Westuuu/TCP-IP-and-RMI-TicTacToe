@@ -40,6 +40,7 @@ public class Player implements Serializable {
     public int getCHAT_PORT() {
         return CHAT_PORT;
     }
+
     public void setCHAT_PORT(int CHAT_PORT) {
         this.CHAT_PORT = CHAT_PORT;
     }

@@ -55,24 +55,18 @@ public class GameUI {
 
     public void displayActiveRooms(Iterable<GameRoom> rooms) {
         System.out.println("\n=== Active Rooms ===");
-        ArrayList<GameRoom> availableRooms = new ArrayList<>();
+        int count = 0;
+        boolean hasRooms = false;
         
-        // First collect all waiting rooms
         for (GameRoom room : rooms) {
-            if (room.getRoomStatus().equals(GameRoom.RoomStatus.WAITING)) {
-                availableRooms.add(room);
-            }
+            count++;
+            hasRooms = true;
+            System.out.printf("%d. Room: %s (ID: %s), Status: %s%n",
+                    count, room.getGameRoomName(), room.getGameRoomID(), room.getRoomStatus());
         }
         
-        // Then display them with proper numbering
-        if (availableRooms.isEmpty()) {
+        if (!hasRooms) {
             System.out.println("No active rooms available.");
-        } else {
-            for (int i = 0; i < availableRooms.size(); i++) {
-                GameRoom room = availableRooms.get(i);
-                System.out.printf("%d. Room: %s (ID: %s), Status: %s%n",
-                        i + 1, room.getGameRoomName(), room.getGameRoomID(), room.getRoomStatus());
-            }
         }
     }
 

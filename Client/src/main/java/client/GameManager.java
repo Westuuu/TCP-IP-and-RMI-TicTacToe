@@ -14,7 +14,7 @@ public class GameManager {
     private final GameUI ui;
     private Player currentPlayer;
     private ChatManager chatManager;
-    private AtomicBoolean inChatMode = new AtomicBoolean(false);
+    private final AtomicBoolean inChatMode = new AtomicBoolean(false);
 
     private class ChatManager implements Runnable {
         private final UUID roomId;
@@ -175,9 +175,17 @@ public class GameManager {
     }
 
     public void joinRoom() throws RemoteException {
-        ArrayList<GameRoom> activeRooms = server.getActiveRooms();
-        ui.displayActiveRooms(activeRooms);
-        String roomId = ui.getRoomIdToJoin(activeRooms);
+        ArrayList<GameRoom> allRooms = server.getActiveRooms();
+        ArrayList<GameRoom> availableRooms = new ArrayList<>();
+        
+        for (GameRoom room : allRooms) {
+            if (room.getRoomStatus() == GameRoom.RoomStatus.WAITING) {
+                availableRooms.add(room);
+            }
+        }
+        
+        ui.displayActiveRooms(availableRooms);
+        String roomId = ui.getRoomIdToJoin(availableRooms);
         if (roomId.isEmpty()) {
             ui.displayError("Invalid room selection.");
             return;
@@ -303,7 +311,7 @@ public class GameManager {
 
                 boolean stateChanged = state.getMoves().size() != lastMoveCount;
                 
-                if (!inChatMode.get() && stateChanged) {
+                if (stateChanged) {
                     ui.displayBoard(state);
                     lastMoveCount = state.getMoves().size();
                 }
@@ -314,7 +322,7 @@ public class GameManager {
                     if (!inChatMode.get() && stateChanged) {
                         ui.displayWaitingForMove(state.getCurrentPlayerTurn());
                     }
-                    
+
                     String input = ui.getInputIfAvailable(inChatMode.get(), state.getCurrentPlayerTurn());
                     if (input != null) {
                         if (input.equals("/chat")) {

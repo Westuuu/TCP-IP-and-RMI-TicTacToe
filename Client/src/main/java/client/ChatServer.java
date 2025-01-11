@@ -41,7 +41,7 @@ public class ChatServer implements AutoCloseable {
         this.writeBuffer = ByteBuffer.allocate(BUFFER_SIZE);
         this.messageBuilder = new StringBuilder();
         this.messageQueue = new ConcurrentLinkedQueue<>();
-        LOGGER.info("Initialized chat server for room " + roomId + " on port " + port);
+//        LOGGER.info("Initialized chat server for room " + roomId + " on port " + port);
     }
 
     public void start() throws IOException {
@@ -80,7 +80,7 @@ public class ChatServer implements AutoCloseable {
             selectorThread.setDaemon(true);
             selectorThread.start();
             
-            LOGGER.info("Chat server started on port " + port);
+//            LOGGER.info("Chat server started on port " + port);
         } catch (IOException e) {
             LOGGER.severe("Failed to start chat server: " + e.getMessage());
             throw e;
@@ -213,7 +213,7 @@ public class ChatServer implements AutoCloseable {
             if (selectorThread != null) {
                 selectorThread.interrupt();
             }
-            LOGGER.info("Chat server stopped for room " + roomId);
+//            LOGGER.info("Chat server stopped for room " + roomId);
         } catch (IOException e) {
             LOGGER.severe("Error closing chat connections: " + e.getMessage());
         }
